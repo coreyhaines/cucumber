@@ -275,9 +275,6 @@ module Cucumber
         excludes, includes = tag_names.partition{|tag| tag =~ /^~/}
         excludes = excludes.map{|tag| tag[1..-1]}
 
-        # Strip @
-        includes = includes.map{|tag| Ast::Tags.strip_prefix(tag)}
-        excludes = excludes.map{|tag| Ast::Tags.strip_prefix(tag)}
         [parse_tag_limits(includes), parse_tag_limits(excludes)]
       end
  

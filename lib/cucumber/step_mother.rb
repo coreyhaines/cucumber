@@ -1,5 +1,6 @@
 require 'cucumber/constantize'
 require 'cucumber/core_ext/instance_exec'
+require 'cucumber/ast/features'
 require 'cucumber/parser/natural_language'
 require 'cucumber/language_support/language_methods'
 require 'cucumber/language_support/step_definition_methods'

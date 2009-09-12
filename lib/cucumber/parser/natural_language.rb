@@ -26,17 +26,7 @@ module Cucumber
       end
 
       def parser
-        return @parser if @parser
-        i18n_tt = File.expand_path(File.dirname(__FILE__) + '/i18n.tt')
-        template = File.open(i18n_tt, Cucumber.file_mode('r')).read
-        erb = ERB.new(template)
-        grammar = erb.result(binding)
-        Treetop.load_from_string(grammar)
-        @parser = Parser::I18n.const_get("#{@keywords['grammar_name']}Parser").new
-        def @parser.inspect
-          "#<#{self.class.name}>"
-        end
-        @parser
+        require 'gherkin'
       end
 
       def parse(source, path, filter)
