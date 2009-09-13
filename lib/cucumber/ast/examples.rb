@@ -11,7 +11,7 @@ module Cucumber
 
       def accept(visitor)
         return if $cucumber_interrupted
-        visitor.visit_comment(@comment) unless @comment.empty?
+        visitor.visit_comment(@comment) unless @comment.nil? || @comment.empty?
         visitor.visit_examples_name(@keyword, @name)
         visitor.visit_outline_table(@outline_table)
       end

@@ -6,8 +6,8 @@ module Cucumber
       attr_writer :features
       attr_reader :name
 
-      def initialize(file, comment, tags, name)
-        @file, @comment, @tags, @name = file, comment, tags, name.strip
+      def initialize(file, comment, tag_names, name)
+        @file, @comment, @tags, @name = file, comment, tags_for(tag_names), name.strip
         @feature_elements = []
         set_default_background
       end
@@ -15,14 +15,15 @@ module Cucumber
       def set_background(comment, keyword, name, line)
         @background = Background.new(comment, keyword, name, line)
         @background.feature = self
+        @background
       end
 
-      def add_scenario(comment, tags, keyword, name, line)
-        add_feature_element(Scenario.new(@background, comment, Tags.new(tags), keyword, name, line))
+      def add_scenario(comment, tag_names, keyword, name, line)
+        add_feature_element(Scenario.new(@background, comment, tags_for(tag_names), keyword, name, line))
       end
 
-      def add_scenario_outline(comment, tags, keyword, name, line)
-        add_feature_element(ScenarioOutline.new(@background, comment, Tags.new(tags), keyword, name, line))
+      def add_scenario_outline(comment, tag_names, keyword, name, line)
+        add_feature_element(ScenarioOutline.new(@background, comment, tags_for(tag_names), keyword, name, line))
       end
 
       def accept(visitor)
@@ -81,7 +82,11 @@ module Cucumber
       end
 
       private
-      
+
+      def tags_for(tag_names)
+        tag_names ? Tags.new(tag_names) : nil
+      end
+
       def set_default_background
         set_background(nil, nil, nil, nil)
       end

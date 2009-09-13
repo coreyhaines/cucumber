@@ -8,7 +8,6 @@ module Cucumber
 
       def initialize(path, filter)
         @path = path
-        @tags = []
       end
 
       def comment(comment, line)
@@ -16,19 +15,27 @@ module Cucumber
       end
 
       def feature(keyword, name_and_narrative, line)
-        @ast = Feature.new(@path, @comment, Tags.new(@tags), name_and_narrative)
+        @ast = Feature.new(@path, @comment, @tag_names, name_and_narrative)
+        @comment = @tag_names = nil
+        @ast
       end
 
       def background(keyword, name, line)
         @feature_element = @ast.set_background(@comment, keyword, name, line)
+        @comment = @tag_names = nil
+        @feature_element
       end
 
       def scenario(keyword, name, line)
-        @feature_element = @ast.add_scenario(@comment, @tags, keyword, name, line)
+        @feature_element = @ast.add_scenario(@comment, @tag_names, keyword, name, line)
+        @comment = @tag_names = nil
+        @feature_element
       end
 
       def scenario_outline(keyword, name, line)
-        @feature_element = @ast.add_scenario_outline(@comment, @tags, keyword, name, line)
+        @feature_element = @ast.add_scenario_outline(@comment, @tag_names, keyword, name, line)
+        @comment = @tag_names = nil
+        @feature_element
       end
 
       def step(keyword, name, line)
@@ -37,6 +44,8 @@ module Cucumber
 
       def examples(keyword, name, line)
         @examples = @feature_element.add_examples(@comment, keyword, name, line)
+        @comment = @tag_names = nil
+        @examples
       end
 
       def table(raw, line)

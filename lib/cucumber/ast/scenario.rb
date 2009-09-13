@@ -12,11 +12,6 @@ module Cucumber
         @steps = StepCollection.new
       end
 
-      def add_step(keyword, name, line)
-        step = StepInvocation.new(self, keyword, name, line, [])
-        @steps.add_step(step)
-      end
-
       def accept(visitor)
         return if $cucumber_interrupted
         

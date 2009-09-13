@@ -49,11 +49,11 @@ module Cucumber
 
         def create_step_invocations!(scenario_outline)
           @scenario_outline = scenario_outline
-          @step_invocations = scenario_outline.step_invocations(self)
+          @steps = scenario_outline.steps_from_cells(self)
         end
         
         def skip_invoke!
-          @step_invocations.each do |step_invocation|
+          @steps.each do |step_invocation|
             step_invocation.skip_invoke!
           end
         end
@@ -71,7 +71,7 @@ module Cucumber
             end
           else
             visitor.step_mother.before_and_after(self) do
-              @step_invocations.each do |step_invocation|
+              @steps.each do |step_invocation|
                 step_invocation.invoke(visitor.step_mother, visitor.options)
                 @exception ||= step_invocation.reported_exception
               end
@@ -90,7 +90,7 @@ module Cucumber
           else
             visitor.step_mother.before_and_after(self) do
               @table.visit_scenario_name(visitor, self)
-              @step_invocations.each do |step_invocation|
+              @steps.each do |step_invocation|
                 step_invocation.invoke(visitor.step_mother, visitor.options)
                 @exception ||= step_invocation.reported_exception
                 step_invocation.visit_step_result(visitor)
@@ -113,7 +113,7 @@ module Cucumber
         
         # Returns true if one or more steps failed
         def failed?
-          @step_invocations.failed? || !!@scenario_exception
+          @steps.failed? || !!@scenario_exception
         end
 
         # Returns true if all steps passed
@@ -124,7 +124,7 @@ module Cucumber
         # Returns the status
         def status
           return :failed if @scenario_exception
-          @step_invocations.status
+          @steps.status
         end
 
         def backtrace_line

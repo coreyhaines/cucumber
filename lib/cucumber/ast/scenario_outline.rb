@@ -18,11 +18,6 @@ module Cucumber
         @examples_array = ExamplesArray.new
       end
 
-      def add_step(keyword, name, line)
-        step = StepInvocation.new(self, keyword, name, line, [])
-        @steps.add_step(step)
-      end
-
       def add_examples(comment, keyword, name, line)
         examples = Examples.new(self, comment, keyword, name, line)
         @examples_array << examples
@@ -31,8 +26,8 @@ module Cucumber
 
       def accept(visitor)
         return if $cucumber_interrupted
-        visitor.visit_comment(@comment) unless @comment.empty?
-        visitor.visit_tags(@tags)
+        visitor.visit_comment(@comment) unless @comment.nil? || @comment.empty?
+        visitor.visit_tags(@tags) if @tags
         visitor.visit_scenario_name(@keyword, @name, file_colon_line(@line), source_indent(first_line_length))
         visitor.visit_steps(@steps)
 
@@ -47,9 +42,9 @@ module Cucumber
         end
       end
 
-      def step_invocations(cells)
-        step_invocations = @steps.step_invocations_from_cells(cells)
-        @background.step_collection(step_invocations)
+      def steps_from_cells(cells)
+        @steps.from_cells(cells)
+        #@background.step_collection(step_invocations)
       end
 
       def each_example_row(&proc)

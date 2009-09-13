@@ -4,8 +4,8 @@ module Cucumber
   module FeatureElement #:nodoc:
     attr_accessor :feature
 
-    def attach_steps(steps)
-      steps.each {|step| step.feature_element = self}
+    def add_step(keyword, name, line)
+      @steps.add_step(self, keyword, name, line)
     end
 
     def file_colon_line(line = @line)
@@ -47,7 +47,7 @@ module Cucumber
     end
 
     def accept_hook?(hook)
-      @tags.accept_hook?(hook) || @feature.accept_hook?(hook)
+      @tags.nil? || @tags.accept_hook?(hook) || @feature.accept_hook?(hook)
     end
 
     def tag_count(tag)

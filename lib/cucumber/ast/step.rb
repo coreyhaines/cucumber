@@ -18,7 +18,7 @@ module Cucumber
         false
       end
 
-      def step_invocation
+      def step_invocationX
         StepInvocation.new(self, @name, @multiline_arg, [])
       end
 

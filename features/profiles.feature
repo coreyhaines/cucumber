@@ -91,7 +91,7 @@ Feature: Profiles
       Then exactly these features should be ran: features/another.feature
 
   Scenario: Overriding the profile's formatter
-    You will most likely want to define a formatter in your default formatter.
+    You will most likely want to define a formatter in your default profile.
     However, you often want to run your features with a different formatter
     yet still use the other the other arguments in the profile. Cucumber will
     allow you to do this by giving precedence to the formatter specified on the

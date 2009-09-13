@@ -11,12 +11,7 @@ module Cucumber
         @steps = StepCollection.new
       end
 
-      def add_step(keyword, name, line)
-        step = StepInvocation.new(self, keyword, name, line, [])
-        @steps.add_step(step)
-      end
-
-      def step_collection(step_invocations)
+      def step_collectionXX(step_invocations)
         unless(@first_collection_created)
           @first_collection_created = true
           @steps.dup(step_invocations)

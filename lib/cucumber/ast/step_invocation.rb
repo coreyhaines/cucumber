@@ -9,23 +9,23 @@ module Cucumber
         /vendor\/rails|lib\/cucumber|bin\/cucumber:|lib\/rspec|gems\//
       ]
 
-      attr_writer :step_collection, :background
+      attr_writer :background
       attr_reader :name, :keyword, :line, :status, :reported_exception, :multiline_arg
       attr_accessor :exception
 
-      def initialize(feature_element, keyword, name, line, matched_cells)
-        @feature_element, @keyword, @name, @line, @matched_cells = 
-          feature_element, keyword, name, line, matched_cells
+      def initialize(prev, feature_element, keyword, name, line, matched_cells)
+        @prev, @feature_element, @keyword, @name, @line, @matched_cells = 
+          prev, feature_element, keyword, name, line, matched_cells
         status!(:skipped)
       end
 
-      def step_invocation_from_cells(cells)
+      def from_cells(previous, cells)
         matched_cells = matched_cells(cells)
 
         delimited_arguments = delimit_argument_names(cells.to_hash)
         name                = replace_name_arguments(delimited_arguments)
         multiline_arg       = @multiline_arg.nil? ? nil : @multiline_arg.arguments_replaced(delimited_arguments)
-        self.class.new(@feature_element, @keyword, name, @line, matched_cells)
+        self.class.new(previous, @feature_element, @keyword, name, @line, matched_cells)
       end
 
       def set_multiline_string(string, line)
@@ -56,7 +56,7 @@ module Cucumber
 
       def invoke(step_mother, options)
         find_step_match!(step_mother)
-        unless @skip_invoke || options[:dry_run] || @exception || @step_collection.exception
+        unless @skip_invoke || options[:dry_run] || @exception #|| @step_collection.exception
           @skip_invoke = true
           begin
             @step_match.invoke(@multiline_arg)
@@ -131,10 +131,6 @@ module Cucumber
         @matched_cells.each do |cell|
           cell.status = status
         end
-      end
-
-      def previous
-        @step_collection.previous_step(self)
       end
 
       def actual_keyword

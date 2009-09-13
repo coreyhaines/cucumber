@@ -4,12 +4,26 @@ module Cucumber
     class StepCollection #:nodoc:
       include Enumerable
       
-      def initialize(steps=[])
-        @steps = steps
+      def initialize
+        @steps = []
       end
 
-      def add_step(step)
-        step.step_collection = self
+      def add_step(feature_element, keyword, name, line)
+        @previous = StepInvocation.new(@previous, feature_element, keyword, name, line, [])
+        _add_step(@previous)
+      end
+
+      def from_cells(cells)
+        steps = StepCollection.new
+        previous_cell_step = nil
+        @steps.each do |step| 
+          previous_cell_step = step.from_cells(previous_cell_step, cells)
+          steps._add_step(previous_cell_step)
+        end
+        steps
+      end
+
+      def _add_step(step)
         @steps << step
         step
       end
@@ -21,30 +35,21 @@ module Cucumber
         end
       end
 
-      def step_invocations(background = false)
-        StepCollection.new(@steps.map{ |step| 
-          i = step.step_invocation
-          i.background = background
-          i
-        })
-      end
+      # def step_invocations(background = false)
+      #   StepCollection.new(@steps.map{ |step| 
+      #     i = step.step_invocation
+      #     i.background = background
+      #     i
+      #   })
+      # end
 
-      def step_invocations_from_cells(cells)
-        @steps.map{|step| step.step_invocation_from_cells(cells)}
-      end
-
-      # Duplicates this instance and adds +step_invocations+ to the end
-      def dup(step_invocations = [])
-        StepCollection.new(@steps + step_invocations)
-      end
+      # # Duplicates this instance and adds +step_invocations+ to the end
+      # def dup(step_invocations = [])
+      #   StepCollection.new(@steps + step_invocations)
+      # end
 
       def each(&proc)
         @steps.each(&proc)
-      end
-
-      def previous_step(step)
-        i = @steps.index(step) || -1
-        @steps[i-1]
       end
 
       def empty?
@@ -69,12 +74,8 @@ module Cucumber
       end
       
       def status
-        @steps.each{|step_invocation| return step_invocation.status if step_invocation.status != :passed}
+        @steps.each{|step| return step.status if step.status != :passed}
         :passed
-      end
-
-      def to_sexp
-        @steps.map{|step| step.to_sexp}
       end
     end
   end
