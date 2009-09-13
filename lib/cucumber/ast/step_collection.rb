@@ -4,9 +4,14 @@ module Cucumber
     class StepCollection #:nodoc:
       include Enumerable
       
-      def initialize(steps)
+      def initialize(steps=[])
         @steps = steps
-        @steps.each{|step| step.step_collection = self}
+      end
+
+      def add_step(step)
+        step.step_collection = self
+        @steps << step
+        step
       end
 
       def accept(visitor, &proc)

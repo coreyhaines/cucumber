@@ -3,7 +3,7 @@ module Cucumber
     class ScenarioOutline #:nodoc:
       include FeatureElement
 
-      module ExamplesArray #:nodoc:
+      class ExamplesArray < Array #:nodoc:
         def accept(visitor)
           return if $cucumber_interrupted
           each do |examples|
@@ -12,30 +12,21 @@ module Cucumber
         end
       end
 
-      # The +example_sections+ argument must be an Array where each element is another array representing
-      # an Examples section. This array has 3 elements:
-      #
-      # * Examples keyword
-      # * Examples section name
-      # * Raw matrix
-      def initialize(background, comment, tags, line, keyword, name, steps, example_sections)
-        @background, @comment, @tags, @line, @keyword, @name = background, comment, tags, line, keyword, name
-        attach_steps(steps)
-        @steps = StepCollection.new(steps)
+      def initialize(background, comment, tags, keyword, name, line)
+        @background, @comment, @tags, @keyword, @name, @line = background, comment, tags, keyword, name, line
+        @steps = StepCollection.new
+        @examples_array = ExamplesArray.new
+      end
 
-        @examples_array = example_sections.map do |example_section|
-          examples_comment    = example_section[0]
-          examples_line       = example_section[1]
-          examples_keyword    = example_section[2]
-          examples_name       = example_section[3]
-          examples_matrix     = example_section[4]
+      def add_step(keyword, name, line)
+        step = StepInvocation.new(self, keyword, name, line, [])
+        @steps.add_step(step)
+      end
 
-          examples_table = OutlineTable.new(examples_matrix, self)
-          Examples.new(examples_comment, examples_line, examples_keyword, examples_name, examples_table)
-        end
-        @examples_array.extend(ExamplesArray)
-
-        @background.feature_elements << self if @background
+      def add_examples(comment, keyword, name, line)
+        examples = Examples.new(self, comment, keyword, name, line)
+        @examples_array << examples
+        examples
       end
 
       def accept(visitor)
@@ -58,11 +49,7 @@ module Cucumber
 
       def step_invocations(cells)
         step_invocations = @steps.step_invocations_from_cells(cells)
-        if @background
-          @background.step_collection(step_invocations)
-        else
-          StepCollection.new(step_invocations)
-        end
+        @background.step_collection(step_invocations)
       end
 
       def each_example_row(&proc)

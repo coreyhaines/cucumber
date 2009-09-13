@@ -11,8 +11,8 @@ module Cucumber
         tag_name =~ /^@(.*)/ ? $1 : tag_name
       end
 
-      def initialize(line, tag_names)
-        @line, @tag_names = line, tag_names
+      def initialize(tag_names)
+        @tag_names = tag_names
       end
 
       def accept(visitor)

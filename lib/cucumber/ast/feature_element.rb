@@ -35,7 +35,7 @@ module Cucumber
     end
 
     def backtrace_line(name = "#{@keyword} #{@name}", line = @line)
-      @feature.backtrace_line(name, line) if @feature
+      @feature.backtrace_line(name, line)
     end
 
     def source_indent(text_length)

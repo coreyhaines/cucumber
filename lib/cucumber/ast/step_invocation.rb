@@ -3,17 +3,33 @@ require 'cucumber/step_match'
 module Cucumber
   module Ast
     class StepInvocation #:nodoc:
+      INDENT = 2
+
       BACKTRACE_FILTER_PATTERNS = [
         /vendor\/rails|lib\/cucumber|bin\/cucumber:|lib\/rspec|gems\//
       ]
 
       attr_writer :step_collection, :background
-      attr_reader :name, :matched_cells, :status, :reported_exception
+      attr_reader :name, :keyword, :line, :status, :reported_exception, :multiline_arg
       attr_accessor :exception
 
-      def initialize(step, name, multiline_arg, matched_cells)
-        @step, @name, @multiline_arg, @matched_cells = step, name, multiline_arg, matched_cells
+      def initialize(feature_element, keyword, name, line, matched_cells)
+        @feature_element, @keyword, @name, @line, @matched_cells = 
+          feature_element, keyword, name, line, matched_cells
         status!(:skipped)
+      end
+
+      def step_invocation_from_cells(cells)
+        matched_cells = matched_cells(cells)
+
+        delimited_arguments = delimit_argument_names(cells.to_hash)
+        name                = replace_name_arguments(delimited_arguments)
+        multiline_arg       = @multiline_arg.nil? ? nil : @multiline_arg.arguments_replaced(delimited_arguments)
+        self.class.new(@feature_element, @keyword, name, @line, matched_cells)
+      end
+
+      def set_multiline_string(string, line)
+        @multiline_arg = PyString.new(string)
       end
 
       def background?
@@ -26,7 +42,11 @@ module Cucumber
 
       def accept(visitor)
         return if $cucumber_interrupted
-        invoke(visitor.step_mother, visitor.options)
+        if ScenarioOutline === @feature_element
+          @step_match = first_match_from_examples(visitor.step_mother)
+        else
+          invoke(visitor.step_mother, visitor.options)
+        end
         visit_step_result(visitor)
       end
 
@@ -62,11 +82,11 @@ module Cucumber
         rescue Undefined => e
           failed(step_mother.options, e, true)
           status!(:undefined)
-          @step_match = NoStepMatch.new(@step, @name)
+          @step_match = NoStepMatch.new(self, @name)
         rescue Ambiguous => e
           failed(step_mother.options, e, false)
           status!(:failed)
-          @step_match = NoStepMatch.new(@step, @name)
+          @step_match = NoStepMatch.new(self, @name)
         end
         step_mother.step_visited(self)
       end
@@ -74,7 +94,7 @@ module Cucumber
       def failed(options, e, clear_backtrace)
         e = filter_backtrace(e)
         e.set_backtrace([]) if clear_backtrace
-        e.backtrace << @step.backtrace_line unless @step.backtrace_line.nil?
+        e.backtrace << backtrace_line unless backtrace_line.nil?
         @exception = e
         if(options[:strict] || !(Undefined === e) || e.nested?)
           @reported_exception = e
@@ -119,31 +139,27 @@ module Cucumber
 
       def actual_keyword
         repeat_keywords = [language.but_keywords, language.and_keywords].flatten
-        if repeat_keywords.index(@step.keyword) && previous
+        if repeat_keywords.index(@keyword) && previous
           previous.actual_keyword
         else
           keyword
         end
       end
 
+      def language
+        @feature_element.language
+      end
+
       def source_indent
-        @step.feature_element.source_indent(text_length)
+        @feature_element.source_indent(text_length)
       end
 
-      def text_length
-        @step.text_length(@name)
-      end
-
-      def keyword
-        @step.keyword
-      end
-
-      def multiline_arg
-        @step.multiline_arg
+      def text_length(name=@name)
+        @keyword.jlength + name.jlength + INDENT # Add indent as steps get indented more than scenarios
       end
 
       def file_colon_line
-        @step.file_colon_line
+        @file_colon_line ||= @feature_element.file_colon_line(@line) unless @feature_element.nil?
       end
 
       def dom_id
@@ -151,15 +167,48 @@ module Cucumber
       end
 
       def backtrace_line
-        @step.backtrace_line
+        @backtrace_line ||= @feature_element.backtrace_line("#{@keyword} #{@name}", @line) #unless @feature_element.nil?
       end
 
-      def language
-        @step.language
+      private
+
+      def first_match_from_examples(step_mother)
+        # @feature_element is always a ScenarioOutline in this case
+        @feature_element.each_example_row do |cells|
+          argument_hash       = cells.to_hash
+          delimited_arguments = delimit_argument_names(argument_hash)
+          name                = replace_name_arguments(delimited_arguments)
+          step_match          = step_mother.step_match(name, @name) rescue nil
+          return step_match if step_match
+        end
+        NoStepMatch.new(self, @name)
       end
 
-      def to_sexp
-        [:step_invocation, @step.line, @step.keyword, @name, (@multiline_arg.nil? ? nil : @multiline_arg.to_sexp)].compact
+      def matched_cells(cells)
+        col_index = 0
+        cells.select do |cell|
+          header_cell = cell.table.header_cell(col_index)
+          col_index += 1
+          delimited = delimited(header_cell.value)
+          @name.index(delimited) || (@multiline_arg && @multiline_arg.has_text?(delimited))
+        end
+      end
+
+      def delimited(s)
+        "<#{s}>"
+      end
+
+      def delimit_argument_names(argument_hash)
+        argument_hash.inject({}) { |h,(name,value)| h[delimited(name)] = value; h }
+      end
+
+      def replace_name_arguments(argument_hash)
+        name_with_arguments_replaced = @name
+        argument_hash.each do |name, value|
+          value ||= ''
+          name_with_arguments_replaced = name_with_arguments_replaced.gsub(name, value) if value
+        end
+        name_with_arguments_replaced
       end
     end
   end

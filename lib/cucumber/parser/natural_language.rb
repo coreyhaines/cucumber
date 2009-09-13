@@ -1,11 +1,14 @@
+require 'gherkin'
+require 'cucumber/ast/builder'
+
 module Cucumber
   module Parser
     class NaturalLanguage
       KEYWORD_KEYS = %w{name native encoding feature background scenario scenario_outline examples given when then but}
 
       class << self
-        def get(step_mother, lang)
-          languages[lang] ||= new(step_mother, lang)
+        def get(step_mother, i18n_language)
+          languages[i18n_language] ||= new(step_mother, i18n_language)
         end
 
         def languages
@@ -13,9 +16,10 @@ module Cucumber
         end
       end
 
-      def initialize(step_mother, lang)
-        @keywords = Cucumber::LANGUAGES[lang]
-        raise "Language not supported: #{lang.inspect}" if @keywords.nil?
+      def initialize(step_mother, i18n_language)
+        @i18n_language = i18n_language
+        @keywords = Cucumber::LANGUAGES[i18n_language]
+        raise "Language not supported: #{i18n_language.inspect}" if @keywords.nil?
         @keywords['grammar_name'] = @keywords['name'].gsub(/\s/, '')
         register_adverbs(step_mother) if step_mother
       end
@@ -25,12 +29,11 @@ module Cucumber
         step_mother.register_adverbs(adverbs) if step_mother
       end
 
-      def parser
-        require 'gherkin'
-      end
-
       def parse(source, path, filter)
-        feature = parser.parse_or_fail(source, path, filter)
+        builder = Ast::Builder.new(path, filter)
+        parser = Gherkin::Parser[@i18n_language].new(builder)
+        parser.scan(source)
+        feature = builder.ast
         feature.language = self if feature
         feature
       end

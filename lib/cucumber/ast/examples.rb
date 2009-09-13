@@ -1,8 +1,12 @@
 module Cucumber
   module Ast
     class Examples #:nodoc:
-      def initialize(comment, line, keyword, name, outline_table)
-        @comment, @keyword, @name, @outline_table = comment, keyword, name, outline_table
+      def initialize(scenario_outline, comment, keyword, name, line)
+        @scenario_outline, @comment, @keyword, @name, @line = scenario_outline, comment, keyword, name, line
+      end
+
+      def set_table(raw, line)
+        @outline_table = OutlineTable.new(raw, @scenario_outline)
       end
 
       def accept(visitor)

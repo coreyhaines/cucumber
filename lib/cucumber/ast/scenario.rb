@@ -7,36 +7,22 @@ module Cucumber
       
       attr_reader :name, :line
       
-      class EmptyBackground 
-        def failed?
-          false
-        end
-        
-        def feature_elements
-          []
-        end
-        
-        def step_collection(step_invocations)
-          StepCollection.new(step_invocations)
-        end
+      def initialize(background, comment, tags, keyword, name, line)
+        @background, @comment, @tags, @keyword, @name, @line = background, comment, tags, keyword, name, line
+        @steps = StepCollection.new
       end
-      
-      def initialize(background, comment, tags, line, keyword, name, steps)
-        @background = background || EmptyBackground.new
-        @comment, @tags, @line, @keyword, @name = comment, tags, line, keyword, name
-        attach_steps(steps)
 
-        step_invocations = steps.map{|step| step.step_invocation}
-        @steps = @background.step_collection(step_invocations)
-        @background.feature_elements << self
+      def add_step(keyword, name, line)
+        step = StepInvocation.new(self, keyword, name, line, [])
+        @steps.add_step(step)
       end
 
       def accept(visitor)
         return if $cucumber_interrupted
         
         with_visitor(visitor) do
-          visitor.visit_comment(@comment) unless @comment.empty?
-          visitor.visit_tags(@tags)
+          visitor.visit_comment(@comment) unless @comment.nil? || @comment.empty?
+          visitor.visit_tags(@tags) if @tags
           visitor.visit_scenario_name(@keyword, @name, file_colon_line(@line), source_indent(first_line_length))
 
           skip_invoke! if @background.failed?

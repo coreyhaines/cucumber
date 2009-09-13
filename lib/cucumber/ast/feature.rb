@@ -2,28 +2,42 @@ module Cucumber
   module Ast
     # Represents the root node of a parsed feature.
     class Feature #:nodoc:
-      attr_accessor :file, :language
+      attr_accessor :language
       attr_writer :features
       attr_reader :name
 
-      def initialize(background, comment, tags, name, feature_elements)
-        @background, @comment, @tags, @name, @feature_elements = background, comment, tags, name.strip, feature_elements
+      def initialize(file, comment, tags, name)
+        @file, @comment, @tags, @name = file, comment, tags, name.strip
+        @feature_elements = []
+        set_default_background
+      end
 
-        background.feature = self if background
-        @feature_elements.each do |feature_element|
-          feature_element.feature = self
-        end
+      def set_background(comment, keyword, name, line)
+        @background = Background.new(comment, keyword, name, line)
+        @background.feature = self
+      end
+
+      def add_scenario(comment, tags, keyword, name, line)
+        add_feature_element(Scenario.new(@background, comment, Tags.new(tags), keyword, name, line))
+      end
+
+      def add_scenario_outline(comment, tags, keyword, name, line)
+        add_feature_element(ScenarioOutline.new(@background, comment, Tags.new(tags), keyword, name, line))
       end
 
       def accept(visitor)
         return if $cucumber_interrupted
-        visitor.visit_comment(@comment) unless @comment.empty?
-        visitor.visit_tags(@tags)
+        visitor.visit_comment(@comment) unless @comment.nil? || @comment.empty?
+        visitor.visit_tags(@tags) unless @tags.nil?
         visitor.visit_feature_name(@name)
-        visitor.visit_background(@background) if @background
+        visitor.visit_background(@background)
         @feature_elements.each do |feature_element|
           visitor.visit_feature_element(feature_element)
         end
+      end
+
+      def hook_context
+        @feature_elements.first || @background
       end
 
       def accept_hook?(hook)
@@ -66,16 +80,18 @@ module Cucumber
         end
       end
 
-      def to_sexp
-        sexp = [:feature, @file, @name]
-        comment = @comment.to_sexp
-        sexp += [comment] if comment
-        tags = @tags.to_sexp
-        sexp += tags if tags.any?
-        sexp += [@background.to_sexp] if @background
-        sexp += @feature_elements.map{|fe| fe.to_sexp}
-        sexp
+      private
+      
+      def set_default_background
+        set_background(nil, nil, nil, nil)
       end
+      
+      def add_feature_element(feature_element)
+        feature_element.feature = self
+        @feature_elements << feature_element
+        feature_element
+      end
+
     end
   end
 end
