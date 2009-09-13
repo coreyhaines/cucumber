@@ -1,6 +1,7 @@
 module Cucumber
   module Ast
     # Holds an Array of Step or StepDefinition
+    # TODO: Make a doubly linked list would be cleaner
     class StepCollection #:nodoc:
       include Enumerable
       

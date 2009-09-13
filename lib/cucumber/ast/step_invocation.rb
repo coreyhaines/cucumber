@@ -19,13 +19,13 @@ module Cucumber
         status!(:skipped)
       end
 
-      def from_cells(previous, cells)
+      def from_cells(prev, cells)
         matched_cells = matched_cells(cells)
 
         delimited_arguments = delimit_argument_names(cells.to_hash)
         name                = replace_name_arguments(delimited_arguments)
         multiline_arg       = @multiline_arg.nil? ? nil : @multiline_arg.arguments_replaced(delimited_arguments)
-        self.class.new(previous, @feature_element, @keyword, name, @line, matched_cells)
+        self.class.new(prev, @feature_element, @keyword, name, @line, matched_cells)
       end
 
       def set_multiline_string(string, line)
@@ -135,8 +135,8 @@ module Cucumber
 
       def actual_keyword
         repeat_keywords = [language.but_keywords, language.and_keywords].flatten
-        if repeat_keywords.index(@keyword) && previous
-          previous.actual_keyword
+        if repeat_keywords.index(@keyword) && @prev
+          @prev.actual_keyword
         else
           keyword
         end

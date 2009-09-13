@@ -10,6 +10,11 @@ module Cucumber
         @path = path
       end
 
+      def tag(tag_name, line)
+        @tag_names ||= []
+        @tag_names << tag_name
+      end
+
       def comment(comment, line)
         @comment = Comment.new(comment)
       end
