@@ -184,4 +184,60 @@ or http://wiki.github.com/aslakhellesoy/cucumber/a-whole-new-world.
       @rb.hooks_for(:before, scenario).should == [fish]
     end
   end
+
+  describe StepMother, "step argument transformations" do
+    after(:each) do
+      # generally transforms are global, but state should be 
+      # cleared when testing them here at the unit level
+      class StepMother; @@transforms = [] end
+    end
+    
+    it "doesn't complain in the happy case" do
+      lambda do
+        StepMother.register_transform('^abc$') {|arg| 42}
+      end.should_not raise_error
+    end
+    
+    it "complains with no transform block" do
+      lambda do
+        StepMother.register_transform('^abc$')
+      end.should raise_error
+    end
+    
+    it "complains with a zero-arg transform block" do
+      lambda do
+        StepMother.register_transform('^abc$') {42}
+      end.should raise_error
+    end
+    
+    it "complains with a multi-arg transform block" do
+      lambda do
+        StepMother.register_transform('^abc$') {|a, b| 42}
+      end.should raise_error
+    end
+    
+    it "allows registering a string pattern" do
+      StepMother.register_transform('^ab*c$') {|arg| 42}
+      StepMother.transform_arguments(['ab']).should == ['ab']
+      StepMother.transform_arguments(['ac']).should == [42]
+      StepMother.transform_arguments(['abc']).should == [42]
+      StepMother.transform_arguments(['abbc']).should == [42]
+    end
+    
+    it "allows registering a regexp pattern" do
+      StepMother.register_transform(/^ab*c$/) {|arg| 42}
+      StepMother.transform_arguments(['ab']).should == ['ab']
+      StepMother.transform_arguments(['ac']).should == [42]
+      StepMother.transform_arguments(['abc']).should == [42]
+      StepMother.transform_arguments(['abbc']).should == [42]
+    end
+
+    it "gives match priority to transforms defined last" do
+      StepMother.register_transform(/^transform_me$/) {|arg| :foo }
+      StepMother.register_transform(/^transform_me$/) {|arg| :bar }
+      StepMother.register_transform(/^transform_me$/) {|arg| :baz }
+      StepMother.transform_arguments(['transform_me']).should == [:baz]
+    end
+  end
+
 end

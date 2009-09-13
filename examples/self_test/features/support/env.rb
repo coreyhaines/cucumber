@@ -16,3 +16,7 @@ end
 After('@background_tagged_before_on_outline') do
   @cukes.should == '888'
 end
+
+Transform /'\d+' to an Integer/ do |step_arg|
+  /'(\d+)' to an Integer/.match(step_arg)[0].to_i
+end
