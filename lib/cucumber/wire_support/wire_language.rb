@@ -20,8 +20,8 @@ module Cucumber
         call('invoke:' + { :id => id, :args => args }.to_json)
       end
 
-      def groups_for_step_name(stepdef_id, step_name)
-        call('GROUPS_FOR_STEP_NAME:' + { :id => stepdef_id, :step_name => step_name }.to_json)
+      def arguments_from(stepdef_id, step_name)
+        call('ARGUMENTS_FROM:' + { :id => stepdef_id, :step_name => step_name }.to_json)
       end
 
       def table_diff_ok
@@ -41,8 +41,8 @@ module Cucumber
         @wire_language.register_wire_step_definition(id, self)
       end
 
-      def groups(step_name)
-        WireGroup.groups_from(@invoker, id, step_name)
+      def arguments_from(step_name)
+        WireArgumentMatcher.arguments_from(@invoker, id, step_name)
       end
 
       def regexp_source
@@ -79,25 +79,19 @@ module Cucumber
 
     end
 
-    class WireGroup
-      def self.groups_from(invoker, stepdef_id, step_name)
-        result = invoker.groups_for_step_name(stepdef_id, step_name)
+    class WireArgumentMatcher
+      def self.arguments_from(invoker, stepdef_id, step_name)
+        result = invoker.arguments_from(stepdef_id, step_name)
         case(result)
-        when /^GROUPS:(.*)/
-          return build_groups(JSON.parse($1))
+        when /^ARGUMENTS:(.*)/
+          return build_arguments(JSON.parse($1))
         when /^FAIL:(.*)/
           raise WireException.new($1)
         end
       end
       
-      def self.build_groups(groups)
-        groups.map{|group| new(group['val'], group['start'])}
-      end
-      
-      attr_reader :val, :start
-
-      def initialize(val, start)
-        @val, @start = val, start
+      def self.build_arguments(arguments)
+        arguments.map{|argument| StepArgument.new(group['val'], group['pos'])}
       end
     end
 

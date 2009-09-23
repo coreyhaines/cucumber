@@ -19,7 +19,7 @@ module Cucumber
         @block.call(*args)
       end
 
-      def groups(step_name)
+      def arguments_from(step_name)
         []
       end
 
@@ -99,12 +99,12 @@ module Cucumber
         when /^invoke:(.*)/
           invocation_instruction = JSON.parse($1)
           send_response invoke_step_definition(invocation_instruction)
-        when /^GROUPS_FOR_STEP_NAME:(.*)/
+        when /^ARGUMENTS_FROM:(.*)/
           hash = JSON.parse($1)
           step_def = step_definitions[hash['id']]
           step_name = hash['step_name']
-          groups = step_def.groups(step_name)
-          send_response("GROUPS:#{groups.to_json}")
+          arguments = step_def.arguments_from(step_name)
+          send_response("ARGUMENTS:#{arguments.to_json}")
         else
           serialized_exception = { :message => "Not understood: #{data}", :backtrace => [] }
           send_response "FAIL:#{serialized_exception.to_json}"
