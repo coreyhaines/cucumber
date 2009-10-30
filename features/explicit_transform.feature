@@ -40,7 +40,7 @@ Feature: transform
       """
       Feature: Step argument transformations
 
-      Scenario: transform with matches
+      Scenario: transform integer
         Then I should transform '10' to an Integer
 
       Scenario: transform symbol
@@ -54,7 +54,7 @@ Feature: transform
       """
       Feature: Step argument transformations
     
-      Scenario: transform with matches
+      Scenario: transform integer
         Then I should transform '10' to an Integer
 
       Scenario: transform symbol
@@ -72,16 +72,16 @@ Feature: transform
       """
       Feature: Step argument transformations
 
-      Scenario: transform with matches
+      Scenario: transform multiple arguments
         Then I should transform '10' to an Integer and 'abc' to a Symbol
       """
     When I run cucumber -s features
     Then it should pass with
       """
       Feature: Step argument transformations
-    
-        Scenario: transform with matches
-          Then I should transform '10' to an Integer
+
+      Scenario: transform multiple arguments
+        Then I should transform '10' to an Integer and 'abc' to a Symbol
 
       1 scenarios (1 passed)
       1 steps (1 passed)
