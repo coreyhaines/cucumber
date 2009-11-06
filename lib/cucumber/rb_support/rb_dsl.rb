@@ -23,8 +23,8 @@ module Cucumber
           @rb_language.register_rb_transform(regexp, proc)          
         end
 
-        def register_rb_step_definition(regexp, proc)
-          @rb_language.register_rb_step_definition(regexp, proc)
+        def register_rb_step_definition(regexp, transforms, proc)
+          @rb_language.register_rb_step_definition(regexp, transforms, proc)
         end
       end
 
@@ -92,8 +92,8 @@ module Cucumber
       # object, which is defined by #World. A new <tt>World</tt>
       # object is created for each scenario and is shared across
       # step definitions within that scenario.
-      def register_rb_step_definition(regexp, temp="hello", &proc)
-        RbDsl.register_rb_step_definition(regexp, proc)
+      def register_rb_step_definition(regexp, transforms={}, &proc)
+        RbDsl.register_rb_step_definition(regexp, transforms, proc)
       end
     end
   end

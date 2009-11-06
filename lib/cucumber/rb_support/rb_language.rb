@@ -105,8 +105,8 @@ module Cucumber
         add_transform(RbTransform.new(self, regexp, proc))
       end
 
-      def register_rb_step_definition(regexp, proc)
-        step_definition = RbStepDefinition.new(self, regexp, proc)
+      def register_rb_step_definition(regexp, transforms, proc)
+        step_definition = RbStepDefinition.new(self, regexp, transforms, proc)
         @step_definitions << step_definition
         step_definition
       end

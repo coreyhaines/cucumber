@@ -24,17 +24,11 @@ Feature: transform
         symbol.should be_kind_of(Symbol)
       end
 
-      Then /^I should transform '10' to an Integer and 'abc' to a Symbol$/,
-            :transform => [:fixnum, :symbol] do |integer, symbol|
-        integer.should be_kind_of(Integer)
-        symbol.should be_kind_of(Symbol)
-      end
-      
       Then /^I should not transform ('\d+') to an Integer$/ do |string|
         string.should be_kind_of(String)
       end
       """
-
+@focus
   Scenario: Transforming single arguments
     Given a file named "features/transform_sample.feature" with:
       """

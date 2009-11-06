@@ -23,14 +23,14 @@ module Cucumber
         end
       end
 
-      def initialize(rb_language, regexp, proc)
+      def initialize(rb_language, regexp, transforms, proc)
         raise MissingProc if proc.nil?
         if String === regexp
           p = Regexp.escape(regexp)
           p = p.gsub(/\\\$\w+/, '(.*)') # Replace $var with (.*)
           regexp = Regexp.new("^#{p}$") 
         end
-        @rb_language, @regexp, @proc = rb_language, regexp, proc
+        @rb_language, @regexp, @transforms, @proc = rb_language, regexp, transforms, proc
         @rb_language.available_step_definition(regexp_source, file_colon_line)
       end
 
@@ -52,6 +52,10 @@ module Cucumber
         args = args.map{|arg| Ast::PyString === arg ? arg.to_s : arg}
         begin
           args = @rb_language.execute_transforms(args)
+          if Cucumber.const_defined?("Transforms")
+            first_arg = args.first
+            args[0] = Cucumber::Transforms.send(@transforms[:transform], first_arg)
+          end
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e
           e.backtrace.unshift(self.backtrace_line)
