@@ -10,7 +10,7 @@ module Cucumber
     end
 
     def stepdef(regexp)
-      RbSupport::RbStepDefinition.new(@rb_language, regexp, lambda{})
+      RbSupport::RbStepDefinition.new(@rb_language, regexp, nil, lambda{})
     end
 
     def step_match(regexp, name)
