@@ -41,6 +41,7 @@ Feature: transform
             :transform => [nil, :symbol] do |string, symbol|
         string.should be_kind_of(String)
         symbol.should be_kind_of(Symbol)
+      end
       """
 
   Scenario: Transforming single arguments
@@ -95,10 +96,10 @@ Feature: transform
         Scenario: transform multiple arguments
           Then I should transform '10' to an Integer and 'abc' to a Symbol
 
-        Scenario: transform multiple arguments
+        Scenario: nil transform for first
           Then I should not transform '20' to an Integer, but transform 'corey' to a Symbol
 
-      1 scenario (1 passed)
-      1 step (1 passed)
+      2 scenarios (2 passed)
+      2 steps (2 passed)
 
       """
