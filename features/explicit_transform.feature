@@ -30,6 +30,13 @@ Feature: transform
       Then /^I should not transform '(\d+)' to an Integer$/ do |string|
         string.should be_kind_of(String)
       end
+
+
+      Then /^I should transform '(\d+)' to an Integer and '(\w+)' to a Symbol$/,
+            :transform => [:fixnum, :symbol] do |integer, symbol|
+        integer.should be_kind_of(Integer)
+        symbol.should be_kind_of(Symbol)
+      end
       """
 
   Scenario: Transforming single arguments
@@ -70,17 +77,18 @@ Feature: transform
       """
       Feature: Step argument transformations
 
-      Scenario: transform multiple arguments
-        Then I should transform '10' to an Integer and 'abc' to a Symbol
+        Scenario: transform multiple arguments
+          Then I should transform '10' to an Integer and 'abc' to a Symbol
       """
     When I run cucumber -s features
     Then it should pass with
       """
       Feature: Step argument transformations
 
-      Scenario: transform multiple arguments
-        Then I should transform '10' to an Integer and 'abc' to a Symbol
+        Scenario: transform multiple arguments
+          Then I should transform '10' to an Integer and 'abc' to a Symbol
 
-      1 scenarios (1 passed)
-      1 steps (1 passed)
+      1 scenario (1 passed)
+      1 step (1 passed)
+
       """
