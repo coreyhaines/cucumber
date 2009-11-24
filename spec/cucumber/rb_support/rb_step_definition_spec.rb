@@ -62,6 +62,14 @@ module Cucumber
             end
             @step_mother.step_match("match this 'hello' and this 'world'").invoke(nil)
           end
+
+          it 'does not transform for nil transform' do
+            @dsl.Given /match this '(.*)' and this '(.*)'/, :transform => [nil, :upcase] do |arg1, arg2|
+              arg1.should == 'hello'
+              arg2.should == 'WORLD'
+            end
+            @step_mother.step_match("match this 'hello' and this 'world'").invoke(nil)
+          end
         end
       end
 

@@ -54,8 +54,10 @@ module Cucumber
           args = @rb_language.execute_transforms(args)
           if (transforms = @transforms[:transform])
             [transforms].flatten.each_with_index do |transform, index|
-              arg = args[index]
-              args[index] = Cucumber::Transforms.send(transform, arg)
+              if transform
+                arg = args[index]
+                args[index] = Cucumber::Transforms.send(transform, arg)
+              end
             end
           end
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
