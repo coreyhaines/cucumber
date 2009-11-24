@@ -18,27 +18,25 @@ module Cucumber
         $inside = nil
       end
       context "explicit transforms" do
-        it "matches regex" do
-          module Cucumber::Transforms
-            def self.reverse(arg)
-              arg.reverse
+        context "single match" do
+          before do
+            module Cucumber::Transforms
+              def self.reverse(arg)
+                arg.reverse
+              end
+              def self.upcase(arg)
+                arg.upcase
+              end
             end
           end
-          @dsl.Given /match this (.*)/, :transform => :reverse do |arg1|
-            arg1.should == 'sucka'
-          end
-          @step_mother.step_match('match this akcus').invoke(nil)
-        end
-        it "matches another" do
-          module Cucumber::Transforms
-            def self.upcase(arg)
-              arg.upcase
+          {:reverse => 'sucka', :upcase => 'AKCUS'}.each do |transform, transformed_value|
+            it "calls transform (#{transform})" do
+              @dsl.Given /match this (.*)/, :transform => transform do |arg1|
+                arg1.should == transformed_value
+              end
+              @step_mother.step_match('match this akcus').invoke(nil)
             end
           end
-          @dsl.Given /match this (.*)/, :transform => :upcase do |arg1|
-            arg1.should == 'SUCKA'
-          end
-          @step_mother.step_match('match this sucka').invoke(nil)
         end
       end
 
