@@ -31,12 +31,16 @@ Feature: transform
         string.should be_kind_of(String)
       end
 
-
       Then /^I should transform '(\d+)' to an Integer and '(\w+)' to a Symbol$/,
             :transform => [:fixnum, :symbol] do |integer, symbol|
         integer.should be_kind_of(Integer)
         symbol.should be_kind_of(Symbol)
       end
+
+      Then /^I should not transform '(\d+)' to an Integer, but transform '(\w+)' to a Symbol$/,
+            :transform => [nil, :symbol] do |string, symbol|
+        string.should be_kind_of(String)
+        symbol.should be_kind_of(Symbol)
       """
 
   Scenario: Transforming single arguments
@@ -79,6 +83,9 @@ Feature: transform
 
         Scenario: transform multiple arguments
           Then I should transform '10' to an Integer and 'abc' to a Symbol
+
+        Scenario: nil transform for first
+          Then I should not transform '20' to an Integer, but transform 'corey' to a Symbol
       """
     When I run cucumber -s features
     Then it should pass with
@@ -87,6 +94,9 @@ Feature: transform
 
         Scenario: transform multiple arguments
           Then I should transform '10' to an Integer and 'abc' to a Symbol
+
+        Scenario: transform multiple arguments
+          Then I should not transform '20' to an Integer, but transform 'corey' to a Symbol
 
       1 scenario (1 passed)
       1 step (1 passed)
