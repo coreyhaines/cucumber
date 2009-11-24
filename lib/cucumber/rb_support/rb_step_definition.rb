@@ -52,7 +52,7 @@ module Cucumber
         args = args.map{|arg| Ast::PyString === arg ? arg.to_s : arg}
         begin
           args = @rb_language.execute_transforms(args)
-          if Cucumber.const_defined?("Transforms")
+          if Cucumber.const_defined?("Transforms") and @transforms[:transform]
             first_arg = args.first
             args[0] = Cucumber::Transforms.send(@transforms[:transform], first_arg)
           end

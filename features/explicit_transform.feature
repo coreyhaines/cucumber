@@ -15,7 +15,7 @@ Feature: transform
           string.to_sym
         end
       end
-      Transforms.extend(MyTransforms)
+      Cucumber::Transforms.extend(MyTransforms)
 
       Then /^I should transform '(\d+)' to an Integer$/,
             :transform => :fixnum do |integer|
@@ -28,40 +28,41 @@ Feature: transform
       end
 
       Then /^I should not transform '(\d+)' to an Integer$/ do |string|
-        string.should be_kind_of(Integer)
+        string.should be_kind_of(String)
       end
       """
-@focus
+
   Scenario: Transforming single arguments
     Given a file named "features/transform_sample.feature" with:
       """
       Feature: Step argument transformations
 
-      Scenario: transform integer
-        Then I should transform '10' to an Integer
+        Scenario: transform integer
+          Then I should transform '10' to an Integer
 
-      Scenario: transform symbol
-        Then I should transform 'abc' to a Symbol
+        Scenario: transform symbol
+          Then I should transform 'abc' to a Symbol
 
-      Scenario: transform without matches
-        Then I should not transform '10' to an Integer
+        Scenario: transform without matches
+          Then I should not transform '10' to an Integer
       """
     When I run cucumber -s features
     Then it should pass with
       """
       Feature: Step argument transformations
-    
-      Scenario: transform integer
-        Then I should transform '10' to an Integer
 
-      Scenario: transform symbol
-        Then I should transform 'abc' to a Symbol
+        Scenario: transform integer
+          Then I should transform '10' to an Integer
 
-      Scenario: transform without matches
-        Then I should not transform '10' to an Integer
+        Scenario: transform symbol
+          Then I should transform 'abc' to a Symbol
+
+        Scenario: transform without matches
+          Then I should not transform '10' to an Integer
 
       3 scenarios (3 passed)
       3 steps (3 passed)
+
       """
 
   Scenario: Transforming two arguments
