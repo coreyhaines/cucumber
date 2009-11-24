@@ -7,25 +7,28 @@ Feature: transform
     Given a standard Cucumber project directory structure
     And a file named "features/step_definitions/steps.rb" with:
       """
-      def fixnum(string)
-        string.scan(/\d/).join.to_i
+      module MyTransforms
+        def fixnum(string)
+          string.scan(/\d/).join.to_i
+        end
+        def symbol(string)
+          string.to_sym
+        end
       end
-      def symbol(string)
-        string.to_sym
-      end
+      Transforms.extend(MyTransforms)
 
-      Then /^I should transform (\d+) to an Integer$/,
+      Then /^I should transform '(\d+)' to an Integer$/,
             :transform => :fixnum do |integer|
         integer.should be_kind_of(Integer)
       end
 
-      Then /^I should transform ('\w+' to a Symbol)$/,
+      Then /^I should transform '(\w+)' to a Symbol$/,
             :transform => :symbol do |symbol|
         symbol.should be_kind_of(Symbol)
       end
 
-      Then /^I should not transform ('\d+') to an Integer$/ do |string|
-        string.should be_kind_of(String)
+      Then /^I should not transform '(\d+)' to an Integer$/ do |string|
+        string.should be_kind_of(Integer)
       end
       """
 @focus

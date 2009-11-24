@@ -1,5 +1,6 @@
 require 'cucumber/rb_support/rb_dsl'
 require 'cucumber/rb_support/rb_world'
+require 'cucumber/rb_support/rb_transforms'
 require 'cucumber/rb_support/rb_step_definition'
 require 'cucumber/rb_support/rb_hook'
 require 'cucumber/rb_support/rb_transform'
