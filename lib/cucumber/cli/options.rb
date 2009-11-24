@@ -48,10 +48,6 @@ module Cucumber
         new(out_stream, error_stream, options).parse!(args)
       end
 
-      def self.parse_tag_arguments(tags_string)
-        tags_string.split(',')
-      end
-
       def initialize(out_stream = STDOUT, error_stream = STDERR, options = {})
         @out_stream   = out_stream
         @error_stream = error_stream
@@ -105,7 +101,7 @@ module Cucumber
             "Examples:",
             "cucumber examples/i18n/en/features",
             "cucumber @features.txt (See --format rerun)",
-            "cucumber --language it examples/i18n/it/features/somma.feature:6:98:113",
+            "cucumber examples/i18n/it/features/somma.feature:6:98:113",
             "cucumber -s -i http://rubyurl.com/eeCl", "", "",
           ].join("\n")
           opts.on("-r LIBRARY|DIR", "--require LIBRARY|DIR",
@@ -119,15 +115,16 @@ module Cucumber
             "This option can be specified multiple times.") do |v|
             @options[:require] << v
           end
-          opts.on("-l LANG", "--language LANG",
+          opts.on("-l LANG", "--language LANG (DEPRECATED)",
             "Specify language for features (Default: #{@options[:lang]})",
             %{Run with "--language help" to see all languages},
             %{Run with "--language LANG help" to list keywords for LANG}) do |v|
             if v == 'help'
               list_languages_and_exit
-            elsif args==['help'] # I think this conditional is just cruft and can be removed
+            elsif args==['help']
               list_keywords_and_exit(v)
             else
+              warn("\nWARNING: --language is deprecated and will be removed in version 0.5.\nSee http://wiki.github.com/aslakhellesoy/cucumber/spoken-languages")
               @options[:lang] = v
             end
           end
@@ -192,7 +189,7 @@ module Cucumber
             @options[:dry_run] = true
             @options[:snippets] = false
           end
-          opts.on("-a", "--autoformat DIRECTORY",
+          opts.on("-a", "--autoformat DIR",
             "Reformats (pretty prints) feature files and write them to DIRECTORY.",
             "Be careful if you choose to overwrite the originals.",
             "Implies --dry-run --formatter pretty.") do |directory|
@@ -294,7 +291,7 @@ module Cucumber
       end
 
       def parse_tags(tag_string)
-        tag_names = Options.parse_tag_arguments(tag_string)
+        tag_names = Ast::Tags.parse_tags(tag_string)
         parse_tag_limits(tag_names)
       end
 

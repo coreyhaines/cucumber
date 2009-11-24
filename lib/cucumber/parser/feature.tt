@@ -195,7 +195,7 @@ module Cucumber
       end
 
       rule step
-        comment space* step_keyword keyword_space name:line_to_eol (eol+ / eof) multi:multiline_arg? white {
+        comment space* step_keyword space* name:line_to_eol (eol+ / eof) multi:multiline_arg? white {
           def at_line?(line)
             step_keyword.line == line ||
             (multi.respond_to?(:at_line?) && multi.at_line?(line))
@@ -203,9 +203,9 @@ module Cucumber
 
           def build
             if multi.respond_to?(:build)
-              Ast::Step.new(step_keyword.line, step_keyword.text_value, name.text_value.strip, multi.build)
+              Ast::Step.new(step_keyword.line, step_keyword.text_value.strip, name.text_value.strip, multi.build)
             else
-              Ast::Step.new(step_keyword.line, step_keyword.text_value, name.text_value.strip)
+              Ast::Step.new(step_keyword.line, step_keyword.text_value.strip, name.text_value.strip)
             end
           end
         }
@@ -273,7 +273,7 @@ module Cucumber
       end
 
       rule reserved_words_and_symbols
-        (step_keyword keyword_space) / scenario_keyword / scenario_outline_keyword / table / tag / comment_line
+        (step_keyword) / scenario_keyword / scenario_outline_keyword / table / tag / comment_line
       end
 
       rule py_string
