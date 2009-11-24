@@ -52,10 +52,11 @@ module Cucumber
         args = args.map{|arg| Ast::PyString === arg ? arg.to_s : arg}
         begin
           args = @rb_language.execute_transforms(args)
-          if @transforms[:transform]
-            transform = [@transforms[:transform]].flatten[0]
-            arg = args.first
-            args[0] = Cucumber::Transforms.send(transform, arg)
+          if (transforms = @transforms[:transform])
+            [transforms].flatten.each_with_index do |transform, index|
+              arg = args[index]
+              args[index] = Cucumber::Transforms.send(transform, arg)
+            end
           end
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e

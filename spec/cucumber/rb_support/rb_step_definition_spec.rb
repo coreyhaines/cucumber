@@ -37,6 +37,13 @@ module Cucumber
               @step_mother.step_match('match this akcus').invoke(nil)
             end
           end
+
+          it "supports array syntax" do
+            @dsl.Given /match this (.*)/, :transform => [:reverse] do |arg1|
+              arg1.should == 'sucka'
+            end
+            @step_mother.step_match('match this akcus').invoke(nil)
+          end
         end
         
         context "multiple matches" do
@@ -48,10 +55,10 @@ module Cucumber
             @step_mother.step_match("match this 'hello' and this 'world'").invoke(nil)
           end
 
-          it "supports array syntax" do
-            @dsl.Given /match this '(.*)' and this '(.*)'/, :transform => [:reverse] do |arg1, arg2|
+          it "transforms second" do
+            @dsl.Given /match this '(.*)' and this '(.*)'/, :transform => [:reverse, :upcase] do |arg1, arg2|
               arg1.should == 'olleh'
-              arg2.should == 'world'
+              arg2.should == 'WORLD'
             end
             @step_mother.step_match("match this 'hello' and this 'world'").invoke(nil)
           end
