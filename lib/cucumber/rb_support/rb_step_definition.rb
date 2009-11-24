@@ -53,9 +53,9 @@ module Cucumber
         begin
           args = @rb_language.execute_transforms(args)
           if @transforms[:transform]
-            first_arg = args.first
             transform = [@transforms[:transform]].flatten[0]
-            args[0] = Cucumber::Transforms.send(transform, first_arg)
+            arg = args.first
+            args[0] = Cucumber::Transforms.send(transform, arg)
           end
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e
