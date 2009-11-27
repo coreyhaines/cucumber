@@ -15,7 +15,7 @@ Feature: transform
           string.to_sym
         end
       end
-      Cucumber::Transforms.extend(MyTransforms)
+      ExplicitTransforms(MyTransforms)
 
       Then /^I should transform '(\d+)' to an Integer$/,
             :transform => :fixnum do |integer|
@@ -41,6 +41,12 @@ Feature: transform
             :transform => [nil, :symbol] do |string, symbol|
         string.should be_kind_of(String)
         symbol.should be_kind_of(Symbol)
+      end
+
+      Then /^I should transform all these '(\d+)' '(\d+)' to an Integer$/,
+           :transform => :fixnum do |int1, int2|
+        int1.should be_kind_of(Integer)
+        int2.should be_kind_of(Integer)
       end
       """
 
@@ -87,6 +93,9 @@ Feature: transform
 
         Scenario: nil transform for first
           Then I should not transform '20' to an Integer, but transform 'corey' to a Symbol
+
+        Scenario: transform all with single transform
+          Then I should transform all these '5' '10' to an Integer
       """
     When I run cucumber -s features
     Then it should pass with
@@ -99,7 +108,10 @@ Feature: transform
         Scenario: nil transform for first
           Then I should not transform '20' to an Integer, but transform 'corey' to a Symbol
 
-      2 scenarios (2 passed)
-      2 steps (2 passed)
+        Scenario: transform all with single transform
+          Then I should transform all these '5' '10' to an Integer
+
+      3 scenarios (3 passed)
+      3 steps (3 passed)
 
       """

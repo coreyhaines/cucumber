@@ -19,7 +19,7 @@ module Cucumber
       end
       context "explicit transforms" do
         before do
-          module Cucumber::Transforms
+          module Cucumber::RbSupport::Transforms
             def self.reverse(arg)
               arg.reverse
             end
@@ -50,7 +50,7 @@ module Cucumber
           it "transforms first" do
             @dsl.Given /match this '(.*)' and this '(.*)'/, :transform => :reverse do |arg1, arg2|
               arg1.should == 'olleh'
-              arg2.should == 'world'
+              arg2.should == 'dlrow'
             end
             @step_mother.step_match("match this 'hello' and this 'world'").invoke(nil)
           end

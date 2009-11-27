@@ -30,7 +30,8 @@ module Cucumber
           p = p.gsub(/\\\$\w+/, '(.*)') # Replace $var with (.*)
           regexp = Regexp.new("^#{p}$") 
         end
-        @rb_language, @regexp, @transforms, @proc = rb_language, regexp, transforms, proc
+        @rb_language, @regexp, @proc = rb_language, regexp, proc
+        @explicit_transforms = Cucumber::RbSupport::ExplicitTransforms.new(transforms ? transforms[:transform] : nil)
         @rb_language.available_step_definition(regexp_source, file_colon_line)
       end
 
@@ -52,14 +53,7 @@ module Cucumber
         args = args.map{|arg| Ast::PyString === arg ? arg.to_s : arg}
         begin
           args = @rb_language.execute_transforms(args)
-          if (transforms = @transforms[:transform])
-            [transforms].flatten.each_with_index do |transform, index|
-              if transform
-                arg = args[index]
-                args[index] = Cucumber::Transforms.send(transform, arg)
-              end
-            end
-          end
+          args = @explicit_transforms.transform(args)
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e
           e.backtrace.unshift(self.backtrace_line)
