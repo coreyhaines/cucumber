@@ -20,7 +20,8 @@ module Cucumber
 
       context "step extensions" do
         it "allows the step extensions to handle the arguments" do
-          Cucumber::StepExtensions.should_receive(:handle_arguments).with(['hello']).and_return(['elloh'])
+          Cucumber::StepExtensions.should_receive(:new).and_return(extensions = mock('extensions'))
+          extensions.should_receive(:handle_arguments).with(['hello']).and_return(['elloh'])
           @dsl.Given /(.*)/ do |arg1|
             arg1.should == 'elloh'
           end

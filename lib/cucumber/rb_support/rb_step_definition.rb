@@ -23,7 +23,7 @@ module Cucumber
         end
       end
 
-      def initialize(rb_language, regexp, transforms, proc)
+      def initialize(rb_language, regexp, extension_args, proc)
         raise MissingProc if proc.nil?
         if String === regexp
           p = Regexp.escape(regexp)
@@ -31,7 +31,8 @@ module Cucumber
           regexp = Regexp.new("^#{p}$") 
         end
         @rb_language, @regexp, @proc = rb_language, regexp, proc
-        @explicit_transforms = Cucumber::RbSupport::ExplicitTransforms.new(transforms ? transforms[:transform] : nil)
+        @explicit_transforms = Cucumber::RbSupport::ExplicitTransforms.new(extension_args ? extension_args[:transform] : nil)
+        @step_extensions = Cucumber::StepExtensions.new(extension_args)
         @rb_language.available_step_definition(regexp_source, file_colon_line)
       end
 
@@ -54,7 +55,7 @@ module Cucumber
         begin
           args = @rb_language.execute_transforms(args)
           args = @explicit_transforms.transform(args)
-          args = Cucumber::StepExtensions.handle_arguments(args)
+          args = @step_extensions.handle_arguments(args)
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e
           e.backtrace.unshift(self.backtrace_line)
