@@ -54,6 +54,7 @@ module Cucumber
         begin
           args = @rb_language.execute_transforms(args)
           args = @explicit_transforms.transform(args)
+          args = Cucumber::StepExtensions.handle_arguments(args)
           @rb_language.current_world.cucumber_instance_exec(true, regexp_source, *args, &@proc)
         rescue Cucumber::ArityMismatchError => e
           e.backtrace.unshift(self.backtrace_line)

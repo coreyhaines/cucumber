@@ -17,6 +17,17 @@ module Cucumber
 
         $inside = nil
       end
+
+      context "step extensions" do
+        it "allows the step extensions to handle the arguments" do
+          Cucumber::StepExtensions.should_receive(:handle_arguments).with(['hello']).and_return(['elloh'])
+          @dsl.Given /(.*)/ do |arg1|
+            arg1.should == 'elloh'
+          end
+          @step_mother.step_match('hello').invoke(nil)
+        end
+      end
+      
       context "explicit transforms" do
         before do
           module Cucumber::RbSupport::Transforms

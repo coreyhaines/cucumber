@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
 require 'cucumber/rb_support/rb_transforms'
 
+
 describe "Global method for adding explicit transforms" do
   module MyTransforms
     def foo(bar)
